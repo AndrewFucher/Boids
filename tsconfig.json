@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "sourceMap": true,
+    "noImplicitAny": false,
+    "allowSyntheticDefaultImports": true,
+    "module": "es6",
+    "target": "es5",
+    "jsx": "react",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": false,
+    // "jsxImportSource": "@emotion/react",
+    // "plugins": [
+    //   {
+    //     "name": "typescript-styled-plugin"
+    //   }
+    // ]
+    "types": ["@emotion/react/types/css-prop"]
+  },
+  "include": ["src/**/*"]
+}

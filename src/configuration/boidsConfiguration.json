@@ -1,0 +1,18 @@
+{
+    "range": {
+        "alignment": 200,
+        "separation": 200,
+        "cohesion": 200,
+        "wall": 100
+    },
+    "speed": {
+        "x": 3,
+        "y": 3
+    },
+    "count": 100,
+    "radius": 20,
+    "colorProperties": {
+        "colorType": 0,
+        "color": "#102A43"
+    }
+}
