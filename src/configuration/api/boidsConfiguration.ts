@@ -4,6 +4,10 @@ export interface BoidsConfiguration {
     count: number
     radius: number
 
+    force: Force
+
+    weight: Weight
+
     colorProperties: ColorProperties
 }
 
@@ -12,4 +16,21 @@ interface BoidsRange {
     separation: number
     cohesion: number
     wall: number
+}
+
+interface Force {
+    maxForce: MaxForce
+}
+
+interface MaxForce {
+    alignment: number
+    separation: number
+    cohesion: number
+    total: number
+}
+
+interface Weight {
+    alignment: number
+    separation: number
+    cohesion: number
 }

@@ -1,6 +1,8 @@
 import { Vector } from '../../vector/Vector'
 
 interface Boid {
+    id: number
+
     location: Point
     facingDirection: Vector
 

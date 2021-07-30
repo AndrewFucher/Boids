@@ -39,6 +39,23 @@ export class Vector {
         return new Vector(this.x - x, this.y - y)
     }
 
+    public multiplySelf(x: number) {
+        this.x *= x
+        this.y *= x
+    }
+
+    public divideSelf(x: number) {
+        if (x === 0) return
+        this.x /= x
+        this.y /= x
+    }
+
+    public limitSelf(maxForce: number) {
+        if (this.getLenght() > maxForce) {
+            this.multiplySelf(maxForce)
+        }
+    }
+
     public getOppositeVector() {
         return new Vector(-this.x, -this.y)
     }

@@ -1,5 +1,6 @@
 import { BoidsConfiguration } from '../../configuration/api/boidsConfiguration'
 import Boids from '../boids/base/Boids'
+import Boid from '../boids/boid/Boid'
 
 class Animation {
     // Configuration
@@ -21,7 +22,15 @@ class Animation {
     // Boids data
     boids: Boids
 
-    constructor(canvas: HTMLCanvasElement, boidsConfiguration: BoidsConfiguration) {
+    // Selected boid
+    indexOfSelectedBoid: number
+    updateSelectedBoid: (boid: Boid) => void
+
+    constructor(
+        canvas: HTMLCanvasElement,
+        boidsConfiguration: BoidsConfiguration,
+        updateSelectedBoid: (boid: Boid) => void
+    ) {
         this.canvas = canvas
         this.boidsConfiguration = boidsConfiguration
         // console.log(canvas)
@@ -37,6 +46,15 @@ class Animation {
         this.boids.initializeNewBoids()
 
         this.prevFrameTime = Date.now()
+
+        this.updateSelectedBoid = updateSelectedBoid
+        this.indexOfSelectedBoid = -1
+
+        this.registerHandlers()
+    }
+
+    registerHandlers() {
+        this.canvas.onclick = this.canvasOnClickHandler
     }
 
     public start() {
@@ -58,32 +76,38 @@ class Animation {
 
     private drawBoids() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
-        // // console.log(this.canvas.width)
-        // let boid = this.boids.arrayOfBoids[0]
-        // // console.log(100, 100, 1000, 0, 2 * Math.PI)
-        // this.context.beginPath()
-        // this.context.arc(1000, 100, 1000, 0, 2 * Math.PI)
-        // this.context.fillStyle = 'white'
-        // this.context.fill()
 
-        // this.context = this.canvas.getContext('2d')
-        // this.context.fillStyle = 'black'
-        // this.context.fillRect(0, 0, this.canvas.width, this.canvas.height)
-        // this.context.fill()
-        // this.context.restore()
-        // this.context.fillStyle = 'white'
-        // this.context.lineWidth = 20
-        // this.context.fillRect(100, 100, 20, 20)
-        // this.context.fill()
-        // this.context.closePath()
-        // console.log(this.context.fillStyle)
+        // Math.floor(boid.location.x), Math.floor(boid.location.y)
+
+        if (this.indexOfSelectedBoid !== -1) {
+            const boid = this.boids.arrayOfBoids[this.indexOfSelectedBoid]
+            this.context.beginPath()
+            this.context.arc(boid.location.x, boid.location.y, this.boidsConfiguration.range.alignment, 0, 2 * Math.PI)
+            this.context.fillStyle = 'rgba(138, 43, 226, 0.3)'
+            this.context.fill()
+        }
 
         this.boids.arrayOfBoids.forEach((boid) => {
             this.context.beginPath()
-            this.context.arc(Math.floor(boid.location.x), Math.floor(boid.location.y), boid.radius, 0, 2 * Math.PI)
+            this.context.arc(boid.location.x, boid.location.y, boid.radius, 0, 2 * Math.PI)
             this.context.fillStyle = boid.color
             this.context.fill()
         })
+    }
+
+    canvasOnClickHandler = (event: MouseEvent) => {
+        this.indexOfSelectedBoid = -1
+        this.boids.arrayOfBoids.forEach((boid, indexOfBoid) => {
+            if (
+                Math.abs(event.x - boid.location.x) <= boid.radius &&
+                Math.abs(event.y - boid.location.y) <= boid.radius
+            ) {
+                this.indexOfSelectedBoid = indexOfBoid
+                return
+            }
+        })
+
+        if (this.indexOfSelectedBoid === -1) this.updateSelectedBoid(null)
     }
 
     mainLoop = () => {
@@ -97,6 +121,8 @@ class Animation {
             // let t1 = Date.now()
             this.runGameWorkflow()
             this.checkCanvasSizes()
+            if (this.indexOfSelectedBoid !== -1)
+                this.updateSelectedBoid(this.boids.arrayOfBoids[this.indexOfSelectedBoid])
             // console.log(Date.now() - t1)
         }
 

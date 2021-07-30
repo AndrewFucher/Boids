@@ -25,18 +25,19 @@ class Boids {
                 x: rangeBetweenBoids * temp + 100,
                 y: rangeBetweenBoids * Math.floor(i / maxInRow) + rangeBetweenBoids + 200,
             }
-            // let facingDirection: Vector = new Vector(Math.random(), Math.random())
-            let facingDirection: Vector = new Vector(1, 1)
+            let facingDirection: Vector = new Vector(Math.random(), Math.random())
+            // let facingDirection: Vector = new Vector(0, 1)
             facingDirection.normilize()
 
             const boid: Boid = {
+                id: i,
                 color: this.boidsConfiguration.colorProperties.color,
                 facingDirection: facingDirection,
                 location: boidLocaton,
                 radius: this.boidsConfiguration.radius,
             }
             this.arrayOfBoids.push(boid)
-            console.log(boid.facingDirection)
+            // console.log(boid.facingDirection)
         }
 
         // console.log(this.arrayOfBoids)
@@ -66,6 +67,7 @@ class Boids {
 
         // Steps
         let separationVector: Vector = new Vector()
+        let numberOfBoidsInRangeOfSeparation: number = 0
 
         let alignmentVector: Vector = new Vector()
         let numberOfBoidsInRangeOfAlignment: number = 0
@@ -81,6 +83,7 @@ class Boids {
 
         this.arrayOfBoids.forEach((currentBoid, i) => {
             separationVector = new Vector()
+            numberOfBoidsInRangeOfSeparation = 0
 
             alignmentVector = new Vector()
             numberOfBoidsInRangeOfAlignment = 0
@@ -95,20 +98,24 @@ class Boids {
             }
 
             this.arrayOfBoids.forEach((neighbourBoid, j) => {
-                if (i === j) return
+                if (i === j) {
+                    return
+                }
 
-                rangeBetweenBoids = currentBoid.facingDirection
-                    .substract(neighbourBoid.facingDirection.x, neighbourBoid.facingDirection.y)
-                    .getLenght()
+                rangeBetweenBoids = new Vector(
+                    currentBoid.location.x - neighbourBoid.location.x,
+                    currentBoid.location.y - neighbourBoid.location.y
+                ).getLenght()
 
                 // Calculation of vectors
                 // separation
                 if (rangeBetweenBoids <= this.boidsConfiguration.range.separation) {
-                    let a = neighbourBoid.facingDirection.substract(
-                        currentBoid.facingDirection.x,
-                        currentBoid.facingDirection.y
+                    let a = new Vector(
+                        neighbourBoid.location.x - currentBoid.location.x,
+                        neighbourBoid.location.y - currentBoid.location.y
                     )
                     a.normilize()
+                    a.divideSelf(rangeBetweenBoids)
                     separationVector.addToSelf(a)
                 }
 
@@ -126,16 +133,35 @@ class Boids {
             })
 
             // Final steps in calculations
-            // separationVector.normilize()
+            if (numberOfBoidsInRangeOfSeparation !== 0) {
+                separationVector.divideSelf(numberOfBoidsInRangeOfSeparation)
+                separationVector.normilize()
+                separationVector.multiplySelf(this.boidsConfiguration.weight.separation)
+                separationVector.substractFromSelf(currentBoid.facingDirection.x, currentBoid.facingDirection.y)
+                separationVector.limitSelf(this.boidsConfiguration.force.maxForce.separation)
+            }
 
-            alignmentVector.x /= numberOfBoidsInRangeOfAlignment
-            alignmentVector.y /= numberOfBoidsInRangeOfAlignment
-            alignmentVector.normilize()
+            if (numberOfBoidsInRangeOfAlignment !== 0) {
+                alignmentVector.divideSelf(numberOfBoidsInRangeOfAlignment)
+                alignmentVector.normilize()
+                alignmentVector.multiplySelf(this.boidsConfiguration.weight.alignment)
+                alignmentVector.substractFromSelf(currentBoid.facingDirection.x, currentBoid.facingDirection.y)
+                alignmentVector.limitSelf(this.boidsConfiguration.force.maxForce.alignment)
+            }
 
-            cohesionVector.x /= numberOfBoidsInRangeOfCohesion
-            cohesionVector.y /= numberOfBoidsInRangeOfCohesion
-            cohesionVector.substractFromSelf(currentBoid.location.x, currentBoid.location.y)
-            cohesionVector.normilize()
+            if (numberOfBoidsInRangeOfCohesion !== 0) {
+                cohesionVector.divideSelf(numberOfBoidsInRangeOfCohesion)
+                // cohesionVector.normilize()
+                // console.log(cohesionVector)
+                // cohesionVector.multiplySelf(this.boidsConfiguration.weight.cohesion)
+                // console.log(cohesionVector)
+                cohesionVector.substractFromSelf(currentBoid.location.x, currentBoid.location.y)
+                // console.log(cohesionVector)
+                cohesionVector.normilize()
+                cohesionVector.multiplySelf(this.boidsConfiguration.weight.cohesion)
+                cohesionVector.substractFromSelf(currentBoid.facingDirection.x, currentBoid.facingDirection.y)
+                cohesionVector.limitSelf(this.boidsConfiguration.force.maxForce.cohesion)
+            }
 
             facingDirection = new Vector()
 
@@ -145,7 +171,7 @@ class Boids {
                 const a = 'asdfsdf'
                 // console.log(`
                 // facingDirection: [${currentBoid.facingDirection.x}, ${currentBoid.facingDirection.y}]
-                // separationVector: [${separationVector.x}, ${separationVector.y}]
+                // separationVector: [${-separationVector.x}, ${-separationVector.y}]
                 // alignmentVector: [${alignmentVector.x}, ${alignmentVector.x}]
                 // cohesionVector: [${cohesionVector.x}, ${cohesionVector.y}]
                 // againstWallVector: [${this.getVectorAgainstWallIfNeeded(currentBoid).x}, ${
@@ -157,8 +183,9 @@ class Boids {
             facingDirection.addToSelf(separationVector.getOppositeVector())
             facingDirection.addToSelf(alignmentVector)
             facingDirection.addToSelf(cohesionVector)
-            // facingDirection.addToSelf(this.getVectorAgainstWallIfNeeded(currentBoid))
-            facingDirection.normilize()
+            facingDirection.addToSelf(this.getVectorAgainstWallIfNeeded(currentBoid))
+            // facingDirection.normilize()
+            facingDirection.limitSelf(this.boidsConfiguration.force.maxForce.total)
 
             newArrayOfBoids[i].facingDirection = facingDirection
         })
@@ -175,14 +202,17 @@ class Boids {
     }
     private getVectorAgainstWallIfNeeded(boid: Boid): Vector {
         const maxRangeToWall: number = this.boidsConfiguration.range.wall + this.boidsConfiguration.radius
-        if (boid.location.x - maxRangeToWall < 0) return new Vector(1, 0)
-        if (boid.location.x + maxRangeToWall > this.canvasWidth) return new Vector(-1, 0)
-        if (boid.location.y - maxRangeToWall < 0) return new Vector(0, 1)
-        if (boid.location.y + maxRangeToWall > this.canvasHeight) return new Vector(0, -1)
-        return new Vector(0, 0)
+        let vectorOppositeToWalls: Vector = new Vector()
+        if (boid.location.x - maxRangeToWall < 0) vectorOppositeToWalls.x = 1 / boid.location.x
+        if (boid.location.x + maxRangeToWall > this.canvasWidth)
+            vectorOppositeToWalls.x = -1 / (this.canvasWidth - boid.location.x)
+        if (boid.location.y - maxRangeToWall < 0) vectorOppositeToWalls.y = 1 / boid.location.y
+        if (boid.location.y + maxRangeToWall > this.canvasHeight)
+            vectorOppositeToWalls.y = -1 / (this.canvasHeight - boid.location.y)
+        return vectorOppositeToWalls
     }
 
-    // If I calculate everything separatly then it will be really slow!
+    // If I calculate everything separatly then it will be really slow! Like 3 times slower then it is now
 
     // private separate() {
 
