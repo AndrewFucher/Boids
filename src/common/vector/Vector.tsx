@@ -52,7 +52,7 @@ export class Vector {
 
     public limitSelf(maxForce: number) {
         if (this.getLenght() > maxForce) {
-            this.multiplySelf(maxForce)
+            this.multiplySelf(maxForce / this.getLenght())
         }
     }
 

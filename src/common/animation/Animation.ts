@@ -99,13 +99,18 @@ class Animation {
         this.indexOfSelectedBoid = -1
         this.boids.arrayOfBoids.forEach((boid, indexOfBoid) => {
             if (
-                Math.abs(event.x - boid.location.x) <= boid.radius &&
-                Math.abs(event.y - boid.location.y) <= boid.radius
+                Math.abs(event.x - boid.location.x) <= boid.radius * 2 &&
+                Math.abs(event.y - boid.location.y) <= boid.radius * 2
             ) {
                 this.indexOfSelectedBoid = indexOfBoid
                 return
             }
         })
+
+        // this.context.fillStyle = 'rgba(123, 120, 1, 0.3)'
+        // this.context.fillRect(event.x - 5, event.y - 5, 10, 10)
+
+        // this.stop()
 
         if (this.indexOfSelectedBoid === -1) this.updateSelectedBoid(null)
     }
