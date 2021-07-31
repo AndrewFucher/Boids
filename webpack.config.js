@@ -16,7 +16,7 @@ module.exports = {
     // By default the output directory is `dist`
     output: {
         filename: "[name].bundle.js",
-        path: path.resolve(__dirname, "dist"),
+        path: path.resolve(__dirname, "build"),
         clean: true
     },
 
