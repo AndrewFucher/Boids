@@ -1,9 +1,9 @@
 {
     "range": {
-        "separation": 30,
+        "separation": 20,
         "alignment": 30,
         "cohesion": 30,
-        "wall": 100
+        "wall": 20
     },
     "speed": {
         "x": 5,
@@ -11,19 +11,20 @@
     },
     "force": {
         "maxForce": {
-            "separation": 0.05,
+            "separation": 1000,
             "alignment": 0.05,
             "cohesion": 0.05,
+            "wall": 5,
             "total": 10
         }
     },
     "weight": {
-        "separation": 1.5,
+        "separation": 1000,
         "alignment": 1,
         "cohesion": 1
     },
-    "count": 200,
-    "radius": 10,
+    "count": 300,
+    "radius": 5,
     "colorProperties": {
         "colorType": 0,
         "color": "#102A43"

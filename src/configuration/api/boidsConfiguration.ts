@@ -1,3 +1,5 @@
+import ColorProperties from '../../common/api/ColorProperties'
+
 export interface BoidsConfiguration {
     range: BoidsRange
     speed: Point
@@ -26,6 +28,7 @@ interface MaxForce {
     alignment: number
     separation: number
     cohesion: number
+    wall: number
     total: number
 }
 

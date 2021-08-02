@@ -79,20 +79,51 @@ class Animation {
 
         // Math.floor(boid.location.x), Math.floor(boid.location.y)
 
-        if (this.indexOfSelectedBoid !== -1) {
-            const boid = this.boids.arrayOfBoids[this.indexOfSelectedBoid]
-            this.context.beginPath()
-            this.context.arc(boid.location.x, boid.location.y, this.boidsConfiguration.range.alignment, 0, 2 * Math.PI)
-            this.context.fillStyle = 'rgba(138, 43, 226, 0.3)'
-            this.context.fill()
-        }
-
-        this.boids.arrayOfBoids.forEach((boid) => {
+        this.boids.arrayOfBoids.forEach((boid, indexOfBoid) => {
+            if (this.indexOfSelectedBoid === indexOfBoid) {
+                this.context.beginPath()
+                this.context.arc(boid.location.x, boid.location.y, boid.radius, 0, 2 * Math.PI)
+                this.context.fillStyle = boid.color
+                this.context.fill()
+                return
+            }
             this.context.beginPath()
             this.context.arc(boid.location.x, boid.location.y, boid.radius, 0, 2 * Math.PI)
             this.context.fillStyle = boid.color
             this.context.fill()
         })
+
+        if (this.indexOfSelectedBoid !== -1) {
+            this.drawBoidRanges(this.boids.arrayOfBoids[this.indexOfSelectedBoid])
+        }
+    }
+
+    private drawBoidRanges(boid: Boid) {
+        this.context.beginPath()
+        this.context.arc(boid.location.x, boid.location.y, this.boidsConfiguration.range.separation, 0, 2 * Math.PI)
+        // this.context.fillStyle = 'rgba(138, 43, 226, 0.3)'
+        this.context.strokeStyle = 'rgba(138, 43, 226, 0.3)'
+        this.context.lineWidth = 2
+        this.context.stroke()
+        // this.context.closePath()
+
+        // this.context.restore()
+
+        this.context.beginPath()
+        this.context.arc(boid.location.x, boid.location.y, this.boidsConfiguration.range.alignment, 0, 2 * Math.PI)
+        // this.context.fillStyle = 'rgba(138, 43, 226, 0.3)'
+        this.context.strokeStyle = 'rgba(252, 186, 3, 0.3)'
+        this.context.lineWidth = 2
+        this.context.stroke()
+        // this.context.closePath()
+
+        this.context.beginPath()
+        this.context.arc(boid.location.x, boid.location.y, this.boidsConfiguration.range.cohesion, 0, 2 * Math.PI)
+        // this.context.fillStyle = 'rgba(138, 43, 226, 0.3)'
+        this.context.strokeStyle = 'rgba(7, 232, 135, 0.3)'
+        this.context.lineWidth = 2
+        this.context.stroke()
+        // this.context.closePath()
     }
 
     canvasOnClickHandler = (event: MouseEvent) => {

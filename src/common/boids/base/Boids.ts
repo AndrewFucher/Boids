@@ -1,4 +1,5 @@
 import { BoidsConfiguration } from '../../../configuration/api/boidsConfiguration'
+import ColorType from '../../enum/ColorType'
 import { Vector } from '../../vector/Vector'
 import Boid from '../boid/Boid'
 
@@ -29,9 +30,14 @@ class Boids {
             // let facingDirection: Vector = new Vector(0, 1)
             facingDirection.normilize()
 
+            let color: string = this.boidsConfiguration.colorProperties.color
+            if (ColorType.Random === this.boidsConfiguration.colorProperties.colorType) {
+                color = `#${Math.floor(Math.random() * 16777215).toString(16)}`
+            }
+
             const boid: Boid = {
                 id: i,
-                color: this.boidsConfiguration.colorProperties.color,
+                color: color,
                 facingDirection: facingDirection,
                 location: boidLocaton,
                 radius: this.boidsConfiguration.radius,
@@ -180,7 +186,7 @@ class Boids {
             }
 
             facingDirection.addToSelf(currentBoid.facingDirection)
-            facingDirection.addToSelf(separationVector.getOppositeVector())
+            facingDirection.substractFromSelf(separationVector.x, separationVector.y)
             facingDirection.addToSelf(alignmentVector)
             facingDirection.addToSelf(cohesionVector)
             facingDirection.addToSelf(this.getVectorAgainstWallIfNeeded(currentBoid))
@@ -209,6 +215,8 @@ class Boids {
         if (boid.location.y - maxRangeToWall < 0) vectorOppositeToWalls.y = 1 / boid.location.y
         if (boid.location.y + maxRangeToWall > this.canvasHeight)
             vectorOppositeToWalls.y = -1 / (this.canvasHeight - boid.location.y)
+
+        vectorOppositeToWalls.multiplySelf(this.boidsConfiguration.force.maxForce.wall)
         return vectorOppositeToWalls
     }
 
